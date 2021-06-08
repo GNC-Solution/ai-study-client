@@ -1,4 +1,9 @@
-import { QueryClient } from "react-query";
+import {
+  ApolloClient,
+  InMemoryCache,
+} from "@apollo/client";
 
-export const endPoint = "http://18.191.174.180:8100/graphql"
-export const queryClient = new QueryClient();
+export const client = new ApolloClient({
+  uri: 'http://18.191.174.180:8100/graphql',
+  cache: new InMemoryCache()
+});

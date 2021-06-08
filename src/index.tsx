@@ -1,17 +1,17 @@
+import { ApolloProvider } from "@apollo/client";
 import { ChakraProvider } from "@chakra-ui/react";
 import React from "react";
 import ReactDOM from "react-dom";
-import { QueryClientProvider } from "react-query";
 import App from "./App";
-import { queryClient } from "./graphqlConfig";
+import { client } from "./graphqlConfig";
 
 ReactDOM.render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
+    <ApolloProvider client={client}>
       <ChakraProvider>
         <App />
       </ChakraProvider>
-    </QueryClientProvider>
+    </ApolloProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );
