@@ -1,0 +1,10 @@
+  query Login($userName: String!, $password: String!) {
+    loginResponse: userCheck(username: $userName, userpwd: $password) {
+      success
+      message
+      user {
+        id
+        name: username
+      }
+    }
+  }
