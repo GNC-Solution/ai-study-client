@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -9,7 +8,8 @@ import {
 } from "@chakra-ui/react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Redirect } from "react-router";
-import { useLoginLazyQuery } from "../graphql/generated/graphql";
+import { useLoginLazyQuery } from "../hooks/useLoginQuery";
+import { useUser } from "../hooks/useUser";
 
 type FormInputType = {
   userName: string;
@@ -19,21 +19,16 @@ type FormInputType = {
 export default function Login() {
   const { register, handleSubmit } = useForm<FormInputType>();
   const [login, { called, loading, data }] = useLoginLazyQuery();
+  const { setUser } = useUser();
+
   const loginResponse = data?.loginResponse;
 
   const onSubmit: SubmitHandler<FormInputType> = (data) => {
     return login({ variables: data });
   };
 
-  const isSuccess = (response: any) => {
-    return response?.success ?? false;
-  };
-
-  const getError = (response: any): string | null => {
-    return response?.message ?? null;
-  };
-
-  if (called && isSuccess(loginResponse)) {
+  if (called && loginResponse?.success) {
+    setUser(loginResponse.user!);
     return <Redirect to="/home" />;
   }
 
@@ -68,10 +63,12 @@ export default function Login() {
                 type="password"
                 {...register("password")}
               />
-              {getError(loginResponse) ? (
+              {loginResponse?.success ? (
                 <div>
                   <Box h={4} />
-                  <p style={{ color: "red", fontSize: "1.2rem" }}>{getError(loginResponse)}</p>
+                  <p style={{ color: "red", fontSize: "1.2rem" }}>
+                    {loginResponse.message}
+                  </p>
                 </div>
               ) : null}
               <Box h={10} />
