@@ -41,6 +41,11 @@ export default function NavigationBar() {
               </Link>
             </li>
             <li>
+              <Link to="/test" className="page-scroll">
+                Test
+              </Link>
+            </li>
+            <li>
               {!user ? (
                 <Link to="/login">Login</Link>
               ) : (

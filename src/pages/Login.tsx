@@ -9,23 +9,18 @@ import {
 import { useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useHistory } from "react-router";
-import { useLoginLazyQuery } from "../hooks/useLoginQuery";
+import { LoginVars, useLoginLazyQuery } from "../hooks/useLoginQuery";
 import { useUser } from "../hooks/useUser";
 
-type FormInputType = {
-  userName: string;
-  password: string;
-};
-
 export default function Login() {
-  const { register, handleSubmit } = useForm<FormInputType>();
+  const { register, handleSubmit } = useForm<LoginVars>();
   const [login, { called, loading, data }] = useLoginLazyQuery();
   const { setUser } = useUser();
   const history = useHistory();
 
   const { success, message, user } = { ...data?.loginResponse };
 
-  const onSubmit: SubmitHandler<FormInputType> = (data) => {
+  const onSubmit: SubmitHandler<LoginVars> = (data) => {
     return login({ variables: data });
   };
 
