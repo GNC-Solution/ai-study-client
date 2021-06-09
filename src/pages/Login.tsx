@@ -6,8 +6,9 @@ import {
   Input,
   Spinner,
 } from "@chakra-ui/react";
+import { useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { Redirect } from "react-router";
+import { useHistory } from "react-router";
 import { useLoginLazyQuery } from "../hooks/useLoginQuery";
 import { useUser } from "../hooks/useUser";
 
@@ -20,17 +21,20 @@ export default function Login() {
   const { register, handleSubmit } = useForm<FormInputType>();
   const [login, { called, loading, data }] = useLoginLazyQuery();
   const { setUser } = useUser();
+  const history = useHistory();
 
-  const loginResponse = data?.loginResponse;
+  const { success, message, user } = { ...data?.loginResponse };
 
   const onSubmit: SubmitHandler<FormInputType> = (data) => {
     return login({ variables: data });
   };
 
-  if (called && loginResponse?.success) {
-    setUser(loginResponse.user!);
-    return <Redirect to="/home" />;
-  }
+  useEffect(() => {
+    if (called && success) {
+      setUser(user!);
+      history.push("/");
+    }
+  }, [called, history, setUser, success, user]);
 
   if (called && data) {
     console.log(data);
@@ -49,9 +53,7 @@ export default function Login() {
       {called && loading ? (
         <Spinner color="teal" />
       ) : (
-        <div
-          style={{ width: "80vw", padding: 30, border: "1px solid #a0a0a0" }}
-        >
+        <div style={{ width: 400, padding: 30, border: "1px solid #a0a0a0" }}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <FormControl id="first-name" isRequired>
               <FormLabel>Username</FormLabel>
@@ -63,18 +65,24 @@ export default function Login() {
                 type="password"
                 {...register("password")}
               />
-              {loginResponse?.success ? (
+              {!success ? (
                 <div>
                   <Box h={4} />
-                  <p style={{ color: "red", fontSize: "1.2rem" }}>
-                    {loginResponse.message}
-                  </p>
+                  <p style={{ color: "red", fontSize: "1.2rem" }}>{message}</p>
                 </div>
               ) : null}
               <Box h={10} />
-              <Button type="submit" bgColor="teal" color="white">
-                로그인
-              </Button>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  width: "100%",
+                }}
+              >
+                <Button type="submit" bgColor="teal" color="white">
+                  로그인
+                </Button>
+              </div>
             </FormControl>
           </form>
         </div>
