@@ -1,7 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useUser } from "../hooks/useUser";
 
 export default function NavigationBar() {
+  const { user } = useUser();
+
   return (
     <nav id="menu" className="navbar navbar-default navbar-fixed-top">
       <div className="container">
@@ -38,7 +41,11 @@ export default function NavigationBar() {
               </Link>
             </li>
             <li>
-              <Link to="/login">Login</Link>
+              {!user ? (
+                <Link to="/login">Login</Link>
+              ) : (
+                <Link to="/logout">Logout</Link>
+              )}
             </li>
           </ul>
         </div>
