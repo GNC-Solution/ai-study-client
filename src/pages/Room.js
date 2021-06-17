@@ -1,26 +1,26 @@
 import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
-// import * as cocoSsd from "@tensorflow-models/body-pix@2.0";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import "@tensorflow/tfjs";
 import dayjs from "dayjs";
-
+import { Spinner } from "@chakra-ui/react";
+import NavigationBar from "../components/NavigationBar";
 const Video = styled.video`
   border: 1px solid blue;
   width: 600;
   height: 500;
 `;
 
-function WebRtcPage2() {
+function Room() {
   const [yourID, setYourID] = useState("");
   const [users, setUsers] = useState({});
-  const [stream, setStream] = useState();
+  const [stream, setStream] = useState(null);
   const [receivingCall, setReceivingCall] = useState(false);
   const [caller, setCaller] = useState("");
   const [callerSignal, setCallerSignal] = useState();
   const [callAccepted, setCallAccepted] = useState(false);
   const [model, setModel] = useState();
-  // const [isLoading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(false);
 
   const canvasRef = useRef();
   const userVideo = useRef();
@@ -38,10 +38,34 @@ function WebRtcPage2() {
   const [timeFlag, setTimeFlag] = useState(false);
   const [pauseFlag, setPauseFlag] = useState(false);
   const [pauseImageFlag, setPauseImageFlag] = useState(false);
+
   useEffect(() => {
     prepare();
     detectFrame();
+
+    // return () => {
+    //   stopRecording();
+    // }
   }, []);
+
+  useEffect(() => {
+    return () => {
+      console.log("화면 꺼짐");
+      // console.log(stream.getTracks());
+      console.log(stream);
+      setLoading(false);
+      if (stream !== null) {
+        stream.getTracks().forEach((track) => {
+          if (track.readyState === "live" && track.kink === "video") {
+            track.stop();
+          }
+        });
+        // window.stream = null
+        console.log("화면 권한을 꺼야하나??");
+      }
+      stopRecording();
+    };
+  }, [stream]);
 
   useEffect(() => {
     const countDown = () => {
@@ -51,12 +75,14 @@ function WebRtcPage2() {
       }, 5000);
     };
 
-    console.log("pauseFlag", pauseFlag, "timeFlag",timeFlag);
+    console.log("pauseFlag", pauseFlag, "timeFlag", timeFlag);
     if (!timeFlag) return;
-    if (!pauseFlag) { // 사람이 몇오간 감지 안될땐 countDown 후 stop
+    if (!pauseFlag) {
+      // 사람이 몇오간 감지 안될땐 countDown 후 stop
       countDown();
       // return () => clearTimeout(countDown);
-    } else { // 자리비움 버튼 클릭했을 땐 바로 stop
+    } else {
+      // 자리비움 버튼 클릭했을 땐 바로 stop
       console.log("자리비움");
       // puadeImage(true)
       setPauseImageFlag(true);
@@ -68,18 +94,20 @@ function WebRtcPage2() {
   let puadeImage;
   useEffect(() => {
     console.log("pauseImageFlag", pauseImageFlag);
-    const ctx = canvasRef.current.getContext("2d");
+
+    let ctx;
     if (pauseImageFlag) {
-      console.log("이미지")
+      ctx = canvasRef.current.getContext("2d");
+      console.log("이미지");
       ctx.fillStyle = "#FF0000";
       ctx.font = "48px serif";
       ctx.fillText("자리비움", 250, 200, 200, 100);
-    } else {
-      console.log("????")
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     }
+    // } else {
+    //   // ctx = canvasRef.current.getContext("2d");
+    //   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    // }
   }, [pauseImageFlag]);
-
 
   const prepare = async () => {
     try {
@@ -90,7 +118,8 @@ function WebRtcPage2() {
       //! cam load
       const getWebCam = async () => {
         await navigator.mediaDevices
-          .getUserMedia({ video: true, audio: true })
+          // .getUserMedia({ video: true, audio: false })
+          .getUserMedia({ video: true })
           .then((stream) => {
             setStream(stream);
             if (userVideo.current) {
@@ -108,10 +137,11 @@ function WebRtcPage2() {
 
       getWebCam();
       setModelFromCocoSsd();
+      await startButtonElement.current.removeAttribute("disabled");
     } catch (error) {
       console.error(error);
     } finally {
-      await startButtonElement.current.removeAttribute("disabled");
+      // await startButtonElement.current.removeAttribute("disabled");
       // setLoading(false);
     }
   };
@@ -126,6 +156,7 @@ function WebRtcPage2() {
       return;
     }
 
+    if (!userVideo.current) return;
     const predictions = await model.detect(userVideo.current);
 
     renderPredictions(predictions); // detect box UI
@@ -152,7 +183,7 @@ function WebRtcPage2() {
       lastDetectionsRef.current.push(false);
     } else {
       setTimeFlag(true);
-      setPauseFlag(false)
+      setPauseFlag(false);
       // stopRecording();
     }
 
@@ -209,7 +240,7 @@ function WebRtcPage2() {
     ctx.font = font;
     ctx.textBaseline = "top";
     predictions.forEach((prediction) => {
-      if (prediction.class === "person") {
+      if (prediction.class === "person" || prediction.class === "cell phone") {
         // console.log(prediction);
         const x = prediction.bbox[0];
         const y = prediction.bbox[1];
@@ -263,132 +294,162 @@ function WebRtcPage2() {
   // }
 
   return (
-    <div className="container-fluid">
-      <div class="row">
-        <div class="col">
-          {/* <video autoPlay playsInline muted ref={userVideo} /> */}
-          {UserVideo}
-          <canvas
-            className="size"
-            ref={canvasRef}
-            width="600"
-            height="500"
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-            }}
-          />
-          {pauseImageFlag  ? (
-            <canvas
-              width="600"
-              height="500"
-              ref={puadeImage}
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-              }}
-            />
-          ) : null}
-        </div>
-        <div class="col">
-          <div>
-            <div class="btn-toolbar" role="toolbar">
-              <div className="btn-group mr-2" role="group">
-                <button
-                  className="btn btn-success"
-                  onClick={() => {
-                    shouldRecordRef.current = true;
-                    stopButtonElement.current.removeAttribute("disabled");
-                    leftSeatButtonElement.current.removeAttribute("disabled");
-                    startButtonElement.current.setAttribute("disabled", true);
-                    detectFrame();
-                    // puadeImage(false)
-                    setPauseImageFlag(false);
+    <div>
+      <NavigationBar />
+      <div
+        style={{
+          height: "100vh",
+          width: "100vw",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {isLoading ? (
+          <Spinner color="teal" />
+        ) : (
+          <div className="container-fluid">
+            <div className="row">
+              <div className="col">
+                {/* <video autoPlay playsInline muted ref={userVideo} /> */}
+                {UserVideo}
+                <canvas
+                  className="size"
+                  ref={canvasRef}
+                  width="500"
+                  height="400"
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
                   }}
-                  ref={startButtonElement}
-                >
-                  학습시작
-                </button>
+                />
+                {pauseImageFlag ? (
+                  <canvas
+                    width="600"
+                    height="500"
+                    ref={puadeImage}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                    }}
+                  />
+                ) : null}
               </div>
-              <div className="btn-group mr-2" role="group">
-                <button
-                  className="btn btn-danger"
-                  onClick={() => {
-                    shouldRecordRef.current = false;
-                    startButtonElement.current.removeAttribute("disabled");
-                    stopButtonElement.current.setAttribute("disabled", true);
-                    leftSeatButtonElement.current.setAttribute(
-                      "disabled",
-                      true
-                    );
-                    stopRecording();
-                    setPauseFlag(false);
-                    // puadeImage(false)
-                    setPauseImageFlag(false);
-                  }}
-                  ref={stopButtonElement}
-                >
-                  학습종료
-                </button>
-              </div>
-              <div className="btn-group mr-2" role="group">
-                <button
-                  className="btn btn-danger"
-                  onClick={() => {
-                    shouldRecordRef.current = false;
-                    startButtonElement.current.removeAttribute("disabled");
-                    stopButtonElement.current.removeAttribute("disabled");
-                    leftSeatButtonElement.current.setAttribute(
-                      "disabled",
-                      true
-                    );
-                    setTimeFlag(true);
-                    setPauseFlag(true);
-                    setPauseImageFlag(true);
-                  }}
-                  ref={leftSeatButtonElement}
-                >
-                  자리비움
-                </button>
-              </div>
+              <div className="col">
+                <div>
+                  <div className="btn-toolbar" role="toolbar">
+                    <div className="btn-group mr-2" role="group">
+                      <button
+                        className="btn btn-success"
+                        onClick={() => {
+                          shouldRecordRef.current = true;
+                          stopButtonElement.current.removeAttribute("disabled");
+                          leftSeatButtonElement.current.removeAttribute(
+                            "disabled"
+                          );
+                          startButtonElement.current.setAttribute(
+                            "disabled",
+                            true
+                          );
+                          detectFrame();
+                          // puadeImage(false)
+                          setPauseImageFlag(false);
+                        }}
+                        ref={startButtonElement}
+                      >
+                        학습시작
+                      </button>
+                    </div>
+                    <div className="btn-group mr-2" role="group">
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => {
+                          shouldRecordRef.current = false;
+                          startButtonElement.current.removeAttribute(
+                            "disabled"
+                          );
+                          stopButtonElement.current.setAttribute(
+                            "disabled",
+                            true
+                          );
+                          leftSeatButtonElement.current.setAttribute(
+                            "disabled",
+                            true
+                          );
+                          stopRecording();
+                          setPauseFlag(false);
+                          // puadeImage(false)
+                          setPauseImageFlag(false);
+                        }}
+                        ref={stopButtonElement}
+                      >
+                        학습종료
+                      </button>
+                    </div>
+                    <div className="btn-group mr-2" role="group">
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => {
+                          shouldRecordRef.current = false;
+                          startButtonElement.current.removeAttribute(
+                            "disabled"
+                          );
+                          stopButtonElement.current.removeAttribute("disabled");
+                          leftSeatButtonElement.current.setAttribute(
+                            "disabled",
+                            true
+                          );
+                          setTimeFlag(true);
+                          setPauseFlag(true);
+                          setPauseImageFlag(true);
+                        }}
+                        ref={leftSeatButtonElement}
+                      >
+                        자리비움
+                      </button>
+                    </div>
 
-              <div className="btn-group mr-2" role="group">
-                <button className="btn btn-danger">Call </button>
-              </div>
-            </div>
+                    <div className="btn-group mr-2" role="group">
+                      <button className="btn btn-danger">Call </button>
+                    </div>
+                  </div>
 
-            <div className="row p-3">
-              <table class="table table-bordered">
-                <thead>
-                  <tr>
-                    <th>Records Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {nowArray.length === 0 ? (
-                    <tr>
-                      <td>No record yet</td>
-                    </tr>
-                  ) : (
-                    nowArray.map((now) => {
-                      return (
+                  <div className="row p-3">
+                    <table className="table table-bordered">
+                      <thead>
                         <tr>
-                          <td>{now}</td>
+                          <th>Records Time</th>
                         </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                      </thead>
+                      <tbody>
+                        {nowArray.length === 0 ? (
+                          <tr>
+                            <td>No record yet</td>
+                          </tr>
+                        ) : (
+                          nowArray.map((now, index) => {
+                            return (
+                              <tr key={index}>
+                                <td>{now}</td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            <div className="row">{PartnerVideo}</div>
           </div>
-        </div>
+        )}
       </div>
-      <div class="row">{PartnerVideo}</div>
     </div>
   );
 }
 
-export default WebRtcPage2;
+export default Room;

@@ -1,47 +1,87 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../hooks/useUser";
-
+import { useHistory } from "react-router";
+import room from "../pages/Room";
 export default function NavigationBar() {
   const { user } = useUser();
+  const history = useHistory();
+
+  console.log("NavigationBar history", history);
+
+  const path = history.location.pathname;
+  console.log("경로?", path);
+
+  let navigationBarContent;
+  if (path === "/") {
+    navigationBarContent = (
+      <>
+        <li>
+          <a className="nav-link scrollto active" href="#hero">
+            Home
+          </a>
+        </li>
+        <li>
+          <a className="nav-link scrollto" href="#about">
+            About
+          </a>
+        </li>
+        <li>
+          <a className="nav-link scrollto" href="/studyStatistics">
+            Statistics
+          </a>
+        </li>
+      </>
+    );
+
+    // window.location.reload()
+  } else if (path === "/studyStatistics") {
+    navigationBarContent = (
+      <>
+        <li>
+          <a className="nav-link scrollto" onClick={history.goBack}>
+            Home
+          </a>
+        </li>
+        <li>
+          <a className="nav-link scrollto active" href="/studyStatistics">
+            Statistics
+          </a>
+        </li>
+      </>
+    );
+  }
+
+
+  let logopath = null;
+  if (path === "/") {
+    logopath = <a onClick={() => window.location.replace("/")}>AI Study</a>;
+  } else if (path === "/studyStatistics" || path === "/room") {
+    logopath = <a onClick={history.goBack}>AI Study</a>;
+  }
 
   return (
-    <nav id="menu" className="navbar navbar-default navbar-fixed-top">
-      <div className="container">
-        <div className="navbar-header">
-          <button
-            type="button"
-            className="navbar-toggle collapsed"
-            data-toggle="collapse"
-            data-target="#bs-example-navbar-collapse-1"
-          >
-            <span className="sr-only">Toggle navigation</span>
-            <span className="icon-bar"></span>
-            <span className="icon-bar"></span>
-            <span className="icon-bar"></span>
-          </button>
-          <Link className="navbar-brand page-scroll" to="/">
-            AI Study
-          </Link>
-        </div>
+    <header
+      id="header"
+      className="fixed-top header-transparent"
+      style={
+        path === "/"
+          ? {
+              background: "",
+            }
+          : {
+              background: "#374055E6",
+            }
+      }
+    >
+      <div className="container d-flex align-items-center justify-content-between">
+        <h1 className="logo">{logopath}</h1>
+        <nav id="navbar" className="navbar">
+          <ul>
+            {navigationBarContent}
 
-        <div
-          className="collapse navbar-collapse"
-          id="bs-example-navbar-collapse-1"
-        >
-          <ul className="nav navbar-nav navbar-right">
             <li>
-              <Link to="/about" className="page-scroll">
-                About
-              </Link>
-            </li>
-            <li>
-              <Link to="/services" className="page-scroll">
-                Services
-              </Link>
-            </li>
-            <li>
-              <Link to="/test" className="page-scroll">
+              <Link to="/test" className="nav-link scrollto">
                 Test
               </Link>
             </li>
@@ -53,8 +93,9 @@ export default function NavigationBar() {
               )}
             </li>
           </ul>
-        </div>
+          <i className="bi bi-list mobile-nav-toggle"></i>
+        </nav>
       </div>
-    </nav>
+    </header>
   );
 }
