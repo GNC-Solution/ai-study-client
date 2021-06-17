@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useHistory } from 'react-router';
 import { useUser } from "../hooks/useUser";
-import { useHistory } from "react-router";
+import { useCookies } from "react-cookie";
 import room from "../pages/Room";
+
 export default function NavigationBar() {
   const { user } = useUser();
   const history = useHistory();
+  const [cookies, setCookie, removeCookie] = useCookies(['user']);
 
   console.log("NavigationBar history", history);
 
@@ -60,6 +63,12 @@ export default function NavigationBar() {
     logopath = <a onClick={history.goBack}>AI Study</a>;
   }
 
+
+  function handleCookie() {
+    removeCookie('user');
+    history.go(0);
+  }
+  
   return (
     <header
       id="header"
@@ -89,7 +98,7 @@ export default function NavigationBar() {
               {!user ? (
                 <Link to="/login">Login</Link>
               ) : (
-                <Link to="/logout">Logout</Link>
+                <a onClick={handleCookie}>Logout</a>
               )}
             </li>
           </ul>
