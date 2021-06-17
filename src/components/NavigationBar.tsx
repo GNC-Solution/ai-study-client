@@ -1,10 +1,19 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useHistory } from 'react-router';
 import { useUser } from "../hooks/useUser";
+import { useCookies } from "react-cookie";
 
 export default function NavigationBar() {
   const { user } = useUser();
+  const history = useHistory();
+  const [cookies, setCookie, removeCookie] = useCookies(['user']);
 
+  function handleCookie() {
+    removeCookie('user');
+    history.go(0);
+  }
+  
   return (
     <nav id="menu" className="navbar navbar-default navbar-fixed-top">
       <div className="container">
@@ -49,7 +58,7 @@ export default function NavigationBar() {
               {!user ? (
                 <Link to="/login">Login</Link>
               ) : (
-                <Link to="/logout">Logout</Link>
+                <a onClick={handleCookie}>Logout</a>
               )}
             </li>
           </ul>
