@@ -1,94 +1,86 @@
-import React, { useState } from "react";
+/* eslint-disable jsx-a11y/anchor-is-valid */
+import React, { useCallback } from "react";
 import { Link } from "react-router-dom";
-import { useHistory } from 'react-router';
+import { useHistory } from "react-router";
 import { useUser } from "../hooks/useUser";
 import { useCookies } from "react-cookie";
-import room from "../pages/Room";
 
 export default function NavigationBar() {
   const { user } = useUser();
   const history = useHistory();
-  const [cookies, setCookie, removeCookie] = useCookies(['user']);
+  const [, , removeCookie] = useCookies(["user"]);
 
   console.log("NavigationBar history", history);
 
   const path = history.location.pathname;
   console.log("경로?", path);
 
-  let navigationBarContent;
-  if (path === "/") {
-    navigationBarContent = (
-      <>
-        <li>
-          <a className="nav-link scrollto active" href="#hero">
-            Home
-          </a>
-        </li>
-        <li>
-          <a className="nav-link scrollto" href="#about">
-            About
-          </a>
-        </li>
-        <li>
-          <a className="nav-link scrollto" href="/studyStatistics">
-            Statistics
-          </a>
-        </li>
-      </>
-    );
+  const renderContent = () => {
+    if (path === "/") {
+      return (
+        <>
+          <li>
+            <a className="nav-link scrollto active" href="#hero">
+              Home
+            </a>
+          </li>
+          <li>
+            <a className="nav-link scrollto" href="#about">
+              About
+            </a>
+          </li>
+          <li>
+            <a className="nav-link scrollto" href="/studyStatistics">
+              Statistics
+            </a>
+          </li>
+        </>
+      );
+    }
 
-    // window.location.reload()
-  } else if (path === "/studyStatistics") {
-    navigationBarContent = (
-      <>
-        <li>
-          <a className="nav-link scrollto" onClick={history.goBack}>
-            Home
-          </a>
-        </li>
-        <li>
-          <a className="nav-link scrollto active" href="/studyStatistics">
-            Statistics
-          </a>
-        </li>
-      </>
-    );
-  }
+    if (path === "/studyStatistics") {
+      return (
+        <>
+          <li>
+            <a className="nav-link scrollto" onClick={history.goBack}>
+              Home
+            </a>
+          </li>
+          <li>
+            <a className="nav-link scrollto active" href="/studyStatistics">
+              Statistics
+            </a>
+          </li>
+        </>
+      );
+    }
 
+    return null;
+  };
 
-  let logopath = null;
-  if (path === "/") {
-    logopath = <a onClick={() => window.location.replace("/")}>AI Study</a>;
-  } else if (path === "/studyStatistics" || path === "/room") {
-    logopath = <a onClick={history.goBack}>AI Study</a>;
-  }
-
+  const onLogoClick = useCallback(() => {
+    if (path === "/") history.push("/");
+    if (path === "/studyStatistics" || path === "/room") history.goBack();
+  }, [history, path]);
 
   function handleCookie() {
-    removeCookie('user');
+    removeCookie("user");
     history.go(0);
   }
-  
+
   return (
     <header
       id="header"
       className="fixed-top header-transparent"
-      style={
-        path === "/"
-          ? {
-              background: "",
-            }
-          : {
-              background: "#374055E6",
-            }
-      }
+      style={path === "/" ? { background: "" } : { background: "#374055E6" }}
     >
       <div className="container d-flex align-items-center justify-content-between">
-        <h1 className="logo">{logopath}</h1>
+        <h1 className="logo">
+          <a onClick={onLogoClick}>AI Study</a>;
+        </h1>
         <nav id="navbar" className="navbar">
           <ul>
-            {navigationBarContent}
-
+            {renderContent()}
             <li>
               <Link to="/test" className="nav-link scrollto">
                 Test
