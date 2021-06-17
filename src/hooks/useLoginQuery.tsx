@@ -1,4 +1,5 @@
 import { gql, useLazyQuery } from "@apollo/client";
+import { LoginResponse } from "../model";
 
 const LOGIN_QUERY = gql`
   query Login($userName: String!, $password: String!) {
@@ -12,17 +13,6 @@ const LOGIN_QUERY = gql`
     }
   }
 `;
-
-export type UserType = {
-  id: number;
-  name: string;
-};
-
-export type LoginResponse = {
-  success: boolean;
-  message: string;
-  user: UserType | null;
-}
 
 type LoginResponseData = {
   loginResponse: LoginResponse

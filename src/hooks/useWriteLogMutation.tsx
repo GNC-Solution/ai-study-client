@@ -1,5 +1,5 @@
 import { gql, useMutation } from "@apollo/client";
-import { ServerResponse } from "../model/response";
+import { ServerResponse } from "../model";
 
 const WRITE_LOG_MUTATION = gql`
   mutation WriteLog(

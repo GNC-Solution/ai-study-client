@@ -1,5 +1,5 @@
 import create from "zustand";
-import { UserType } from "./useLoginQuery";
+import { UserType } from "../model";
 
 type UserState = {
   user: UserType | null;
