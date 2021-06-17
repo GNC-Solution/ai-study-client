@@ -3,7 +3,8 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Test from "./pages/Test";
-import Room from './pages/Room'
+import Room from "./pages/Room";
+import StudyStatistics from "./pages/StudyStatistics";
 
 
 // TODO: test route should be removed
@@ -19,12 +20,15 @@ function App() {
         </Route>
 
         <Route path="/room">
-          <Room/>
+          <Room />
         </Route>
         <Route path="/test">
           <Test roomNumber={"2"} />
-
         </Route>
+        <Route path="/studyStatistics">
+          <StudyStatistics/>
+        </Route>
+
       </Switch>
     </BrowserRouter>
   );

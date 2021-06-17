@@ -29,8 +29,12 @@ export default function Login() {
   useEffect(() => {
     if (called && success) {
       setUser(user!);
+
       setCookie('user', user);
-      history.push("/");
+
+      // history.push("/");
+      history.goBack()
+
     }
   }, [called, history, setUser, success, user]);
 
