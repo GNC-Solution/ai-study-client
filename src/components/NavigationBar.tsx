@@ -2,11 +2,11 @@
 import React, { useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useHistory } from "react-router";
-import { useUser } from "../hooks/useUser";
+import { useUserStore } from "../hooks/useUserStore";
 import { useCookies } from "react-cookie";
 
 export default function NavigationBar() {
-  const { user } = useUser();
+  const { user } = useUserStore();
   const history = useHistory();
   const [, , removeCookie] = useCookies(["user"]);
 
