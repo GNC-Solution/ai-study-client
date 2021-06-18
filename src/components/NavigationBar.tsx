@@ -4,11 +4,12 @@ import { Link } from "react-router-dom";
 import { useHistory } from "react-router";
 import { useUserStore } from "../hooks/useUserStore";
 import { useCookies } from "react-cookie";
+import { USER_KEY } from "../constants";
 
 export default function NavigationBar() {
   const { user } = useUserStore();
   const history = useHistory();
-  const [, , removeCookie] = useCookies(["user"]);
+  const [, , removeCookie] = useCookies([USER_KEY]);
 
   console.log("NavigationBar history", history);
 
@@ -64,7 +65,7 @@ export default function NavigationBar() {
   }, [history, path]);
 
   function handleCookie() {
-    removeCookie("user");
+    removeCookie(USER_KEY);
     history.go(0);
   }
 

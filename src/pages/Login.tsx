@@ -12,13 +12,14 @@ import { useHistory } from "react-router";
 import { LoginVars, useLoginLazyQuery } from "../hooks/useLoginQuery";
 import { useUserStore } from "../hooks/useUserStore";
 import { useCookies } from 'react-cookie';
+import { USER_KEY } from "../constants";
 
 export default function Login() {
   const { register, handleSubmit } = useForm<LoginVars>();
   const [login, { called, loading, data }] = useLoginLazyQuery();
   const { setUser } = useUserStore();
   const history = useHistory();
-  const [, setCookie] = useCookies(['user']);
+  const [, setCookie] = useCookies([USER_KEY]);
 
   const { success, message, user } = { ...data?.loginResponse };
 
@@ -29,7 +30,7 @@ export default function Login() {
   useEffect(() => {
     if (called && success) {
       setUser(user!);
-      setCookie('user', user);
+      setCookie(USER_KEY, user);
 
       history.goBack()
     }
