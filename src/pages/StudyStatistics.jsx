@@ -1,6 +1,4 @@
 import React from "react";
-import { useHistory } from "react-router";
-import { useUser } from "../hooks/useUser";
 import NavigationBar from "../components/NavigationBar";
 
 export default function StudyStatistics() {
