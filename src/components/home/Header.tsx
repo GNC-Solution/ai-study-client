@@ -1,9 +1,9 @@
 import React from "react";
 import { useHistory } from "react-router";
-import { useUser } from "../../hooks/useUser";
+import { useUserStore } from "../../hooks/useUserStore";
 
 export default function Header() {
-  const { user } = useUser();
+  const { user } = useUserStore();
   const history = useHistory();
 
   const onClick = () => {

@@ -2,7 +2,7 @@ import { Button } from "@chakra-ui/button";
 import { Spinner } from "@chakra-ui/spinner";
 import React, { useEffect } from "react";
 import { useHistory } from "react-router";
-import { useUser } from "../hooks/useUser";
+import { useUserStore } from "../hooks/useUserStore";
 import { useWriteLogMutation } from "../hooks/useWriteLogMutation";
 
 type TestProps = {
@@ -12,7 +12,7 @@ type TestProps = {
 export default function Test({ roomNumber }: TestProps) {
   const [writeLog, { data, loading }] = useWriteLogMutation();
   const history = useHistory();
-  const { user } = useUser();
+  const { user } = useUserStore();
 
   const writeExistLog = (isExist: boolean) =>
     writeLog({
