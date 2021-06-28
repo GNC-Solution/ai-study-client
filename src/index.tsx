@@ -4,12 +4,15 @@ import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
 import { client } from "./graphqlConfig";
+import { CookiesProvider } from "react-cookie";
 
 ReactDOM.render(
   <React.StrictMode>
     <ApolloProvider client={client}>
       <ChakraProvider>
-        <App />
+        <CookiesProvider>
+          <App />
+        </CookiesProvider>
       </ChakraProvider>
     </ApolloProvider>
   </React.StrictMode>,

@@ -3164,7 +3164,7 @@
   resolved "https://registry.npmjs.org/@types/history/-/history-4.7.8.tgz"
   integrity sha512-S78QIYirQcUoo6UJZx9CSP0O2ix9IaeAXwQi26Rhr/+mg7qqPy8TzaxHSUut7eGjL8WmLccT7/MXf304WjqHcA==
 
-"@types/hoist-non-react-statics@^3.0.1":
+"@types/hoist-non-react-statics@*", "@types/hoist-non-react-statics@^3.0.1":
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.1.tgz#1124aafe5118cb591977aeb1ceaaed1070eb039f"
   integrity sha512-iMIqiko6ooLrTh1joXodJK5X9xeEALT1kM5G3ZLhD3hszxBdIEd5C75U834D9mLcINgD4OyZf5uQXjkuYydWvA==
@@ -3362,6 +3362,15 @@
   version "2.0.0"
   resolved "https://registry.npmjs.org/@types/stack-utils/-/stack-utils-2.0.0.tgz"
   integrity sha512-RJJrrySY7A8havqpGObOB4W92QXKJo63/jFLLgpvOtsGUqbQZ9Sbgl35KMm1DjC6j7AvmmU2bIno+3IyEaemaw==
+
+"@types/styled-components@^5.1.10":
+  version "5.1.10"
+  resolved "https://registry.yarnpkg.com/@types/styled-components/-/styled-components-5.1.10.tgz#b509da9d62be8a02cefd88ec6b820f417429a503"
+  integrity sha512-g3ZfWlTiyXktASIhcfCicZtqB/fFFnq0a7kPYYxKXNggdrohp8m/9bMmmt3zDvHj2gplWDGCkZByfFnEXfbSWg==
+  dependencies:
+    "@types/hoist-non-react-statics" "*"
+    "@types/react" "*"
+    csstype "^3.0.2"
 
 "@types/tapable@*", "@types/tapable@^1.0.5":
   version "1.0.6"
@@ -4959,6 +4968,16 @@ chardet@^0.7.0:
   version "0.7.0"
   resolved "https://registry.npmjs.org/chardet/-/chardet-0.7.0.tgz"
   integrity sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==
+
+chart.js@^3.3.2:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/chart.js/-/chart.js-3.3.2.tgz#667f3a0b6371b9719d8949c04a5bcbaec0d8c615"
+  integrity sha512-H0hSO7xqTIrwxoACqnSoNromEMfXvfuVnrbuSt2TuXfBDDofbnto4zuZlRtRvC73/b37q3wGAWZyUU41QPvNbA==
+
+chartjs-plugin-datalabels@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/chartjs-plugin-datalabels/-/chartjs-plugin-datalabels-1.0.0.tgz#5a3d21dde1ed12602dd48c634985a39f431165f1"
+  integrity sha512-rqaAFrZT++7OoCJgRCPjugTR4kYpdmrTeX7qHTAZoNQaOaMdx4g6o0Eo9J7n3qLRQrhWjh9l731JsrbkJxL7Vg==
 
 check-types@^11.1.1:
   version "11.1.2"
@@ -9904,6 +9923,11 @@ mkdirp@^1.0.3, mkdirp@^1.0.4:
   resolved "https://registry.npmjs.org/mkdirp/-/mkdirp-1.0.4.tgz"
   integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
 
+moment@^2.29.1:
+  version "2.29.1"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.1.tgz#b2be769fa31940be9eeea6469c075e35006fa3d3"
+  integrity sha512-kHmoybcPV8Sqy59DwNDY3Jefr64lK/by/da0ViFcuA4DH0vQg5Q6Ze5VimxkfQNSC+Mls/Kx53s7TjP1RhFEDQ==
+
 move-concurrently@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/move-concurrently/-/move-concurrently-1.0.1.tgz"
@@ -11722,6 +11746,13 @@ react-app-polyfill@^2.0.0:
     raf "^3.4.1"
     regenerator-runtime "^0.13.7"
     whatwg-fetch "^3.4.1"
+
+react-chartjs-2@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/react-chartjs-2/-/react-chartjs-2-3.0.3.tgz#9cb1981396f9574afebd29aff4e6df71ed615596"
+  integrity sha512-jOFZKwZ8sMLkddewZ/tToxuu4pYimAvvY5I6uK+hCpSFT16Pvo2bdHhUoZ0X87zu9I+dx2I+JCqaLN6XhmrbDg==
+  dependencies:
+    lodash "^4.17.19"
 
 react-clientside-effect@^1.2.2:
   version "1.2.5"
