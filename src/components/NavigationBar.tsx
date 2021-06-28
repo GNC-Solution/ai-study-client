@@ -11,10 +11,10 @@ export default function NavigationBar() {
   const history = useHistory();
   const [, , removeCookie] = useCookies([USER_KEY]);
 
-  console.log("NavigationBar history", history);
+  // console.log("NavigationBar history", history);
 
   const path = history.location.pathname;
-  console.log("경로?", path);
+  // console.log("경로?", path);
 
   const renderContent = () => {
     if (path === "/") {
@@ -56,6 +56,23 @@ export default function NavigationBar() {
       );
     }
 
+    if (path === "/room") {
+      return (
+        <>
+          <li>
+            <a
+              className="nav-link scrollto"
+              onClick={() => {
+                history.replace("/studyStatistics");
+              }}
+            >
+              Statistics
+            </a>
+          </li>
+        </>
+      );
+    }
+
     return null;
   };
 
@@ -77,7 +94,7 @@ export default function NavigationBar() {
     >
       <div className="container d-flex align-items-center justify-content-between">
         <h1 className="logo">
-          <a onClick={onLogoClick}>AI Study</a>;
+          <a onClick={onLogoClick}>AI Study</a>
         </h1>
         <nav id="navbar" className="navbar">
           <ul>
@@ -89,9 +106,13 @@ export default function NavigationBar() {
             </li>
             <li>
               {!user ? (
-                <Link to="/login">Login</Link>
+                <Link to="/login" className="nav-link scrollto">
+                  Login
+                </Link>
               ) : (
-                <a onClick={handleCookie}>Logout</a>
+                <a onClick={handleCookie} className="nav-link scrollto">
+                  Logout
+                </a>
               )}
             </li>
           </ul>

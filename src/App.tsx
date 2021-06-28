@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Test from "./pages/Test";
 import Room from "./pages/Room";
+import Test1 from "./pages/Test1"
 import StudyStatistics from "./pages/StudyStatistics";
 
 
@@ -27,6 +28,9 @@ function App() {
         </Route>
         <Route path="/studyStatistics">
           <StudyStatistics/>
+        </Route>
+        <Route path="/test1">
+          <Test1/>
         </Route>
 
       </Switch>
