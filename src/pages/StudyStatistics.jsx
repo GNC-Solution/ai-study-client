@@ -1,16 +1,12 @@
 import NavigationBar from "../components/NavigationBar";
-import {
-  Button,
-  ButtonGroup,
-  useCounter
-} from "@chakra-ui/react";
+import { Button, ButtonGroup, useCounter, Spinner } from "@chakra-ui/react";
 import { useDailyQuery } from "../hooks/useDailyQuery";
-import { Bar, Chart } from 'react-chartjs-2';
+import { Bar, Chart } from "react-chartjs-2";
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { useUserStore } from "../hooks/useUserStore";
-import moment from 'moment';
-import 'moment/locale/ko';
+import moment from "moment";
+import "moment/locale/ko";
 import { func } from "@tensorflow/tfjs-data";
 
 const ChartWrapper = styled.div`
@@ -55,8 +51,8 @@ let _options;
 let _legend;
 
 // 차트 제일 좌측/우측 날짜
-let leftDateOnChart = moment().subtract(14,'d').format('yyyyMMDD');
-let rightDateOnChart = moment().format('yyyyMMDD');
+let leftDateOnChart = moment().subtract(14, "d").format("yyyyMMDD");
+let rightDateOnChart = moment().format("yyyyMMDD");
 
 // 날짜 왼쪽으로 움직인 횟수 (1이면 좌측/우측 끝 날짜 -1일)
 let moveLoc = 0;
@@ -65,7 +61,7 @@ export function ChartDiv() {
   const [countings, updateCountings] = useState([0, 0, 0]);
   const { user } = useUserStore();
   const { loading, error, data } = useDailyQuery({ userName: user.name });
-  const { success, message, dailyStudyRatio } = {...data?.dailyResponse };
+  const { success, message, dailyStudyRatio } = { ...data?.dailyResponse };
 
   // chart를 가리킬 ref 생성
   const myChartRef = useRef();
@@ -73,30 +69,33 @@ export function ChartDiv() {
   // chart.update();
   console.log(myChartRef.current);
 
-  useEffect ( () => {
+  useEffect(() => {
     // 차트 업데이트
     setChartData();
-    console.log('effect');
-  }, [dailyStudyRatio])
+    console.log("effect");
+  }, [dailyStudyRatio]);
 
   setChartConfig();
   _options.onClick = (event, config, ctx) => {
-    if(config.length == 0)
-      alert('click bars');
+    if (config.length == 0) alert("click bars");
     else {
       let idx = config[1].index;
       console.log(datesSliced);
       console.log(pauseCountSliced);
       console.log(phoneUsageCountSliced);
-      updateCountings([datesSliced[idx], pauseCountSliced[idx], phoneUsageCountSliced[idx]]);
+      updateCountings([
+        datesSliced[idx],
+        pauseCountSliced[idx],
+        phoneUsageCountSliced[idx],
+      ]);
     }
-    
-    ctx.data.labels.push('aaa');
-    console.log(ctx.data.labels);
-  }
 
-  if(dailyStudyRatio != undefined) {
-    for(let i=0; i<dailyStudyRatio.length; i++) {
+    ctx.data.labels.push("aaa");
+    console.log(ctx.data.labels);
+  };
+
+  if (dailyStudyRatio != undefined) {
+    for (let i = 0; i < dailyStudyRatio.length; i++) {
       dates[i] = dailyStudyRatio[i].date;
       studyHour[i] = dailyStudyRatio[i].dailyStudyHour;
       pauseHour[i] = dailyStudyRatio[i].dailyPauseHour;
@@ -109,47 +108,73 @@ export function ChartDiv() {
     return (
       <>
         <Title>{user.name}님의 학습 기록</Title>
-        <br/>
-        <br/>
+        <br />
+        <br />
         <div>
-          <Title>{moment().format('yyyy.MM.DD (dd)')}</Title>
-          <ButtonGroup variant="outline" spacing="0" isAttached="true" float="right"> 
+          <Title>{moment().format("yyyy.MM.DD (dd)")}</Title>
+          <ButtonGroup
+            variant="outline"
+            spacing="0"
+            isAttached="true"
+            float="right"
+          >
             <Button onClick={showDaily}>일간</Button>
             <Button onClick={showWeekly}>주간</Button>
             <Button onClick={showMonthly}>월간</Button>
           </ButtonGroup>
         </div>
-        <br/>
-        <br/>
+        <br />
+        <br />
         <div>
-          <Bar ref={myChartRef} data={_data} legend={_legend} options={_options} width={550} height={250}/>
-          <Button onClick={goLeft} float='left'>◀</Button>
-          <Button onClick={goRight} float='right'>▶</Button>
+          <Bar
+            ref={myChartRef}
+            data={_data}
+            legend={_legend}
+            options={_options}
+            width={550}
+            height={250}
+          />
+          <Button onClick={goLeft} float="left">
+            ◀
+          </Button>
+          <Button onClick={goRight} float="right">
+            ▶
+          </Button>
         </div>
-        <br/>
-        <br/>
+        <br />
+        <br />
         <div>
           <label>날짜: {countings[0]}</label>
-          <br/>
+          <br />
           <label>자리비움 횟수: {countings[1]}</label>
-          <br/>
+          <br />
           <label>폰 사용 횟수: {countings[2]}</label>
         </div>
       </>
     );
-  }
-  else {
+  } else {
     return (
-    <>
-      <Button
-        isLoading
-        loadingText="Loading"
-        colorScheme="teal"
-        variant="ghost"
-        spinnerPlacement="start"
-      >
-      </Button>
-    </>
+      <>
+        {/* <Button
+          isLoading
+          loadingText="Loading"
+          colorScheme="teal"
+          variant="ghost"
+          spinnerPlacement="start"
+        ></Button> */}
+        <Spinner
+          color="red.500"
+          size="xl"
+          emptyColor="gray.200"
+          thickness="4px"
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        />
+      </>
     );
   }
 }
@@ -157,7 +182,7 @@ export function ChartDiv() {
 export default function StudyStatistics() {
   return (
     <>
-      <NavigationBar/>
+      <NavigationBar />
       <section id="statistics" className="statistics">
         <div className="container">
           <div className="row content">
@@ -173,42 +198,54 @@ export default function StudyStatistics() {
   );
 }
 
-function showDaily() { console.log("Show Daily"); }
-function showWeekly() { alert('준비 중입니다..'); }
-function showMonthly() { alert('준비 중입니다..'); }
+function showDaily() {
+  console.log("Show Daily");
+}
+function showWeekly() {
+  alert("준비 중입니다..");
+}
+function showMonthly() {
+  alert("준비 중입니다..");
+}
 
 function goLeft() {
   // 날짜 범위 -1일
-  if(leftDateOnChart > dates[0]) {
+  if (leftDateOnChart > dates[0]) {
     moveLoc++;
 
-    rightDateOnChart = moment().subtract(moveLoc, 'd').format('yyyyMMDD');
-    leftDateOnChart = moment().subtract(14 + moveLoc, 'd').format('yyyyMMDD');
+    rightDateOnChart = moment().subtract(moveLoc, "d").format("yyyyMMDD");
+    leftDateOnChart = moment()
+      .subtract(14 + moveLoc, "d")
+      .format("yyyyMMDD");
     alert(rightDateOnChart + ", " + leftDateOnChart);
-    
+
     setChartData();
   }
 
-  if(moveLoc <= dates[0]) {} // 버튼 비활성화 
+  if (moveLoc <= dates[0]) {
+  } // 버튼 비활성화
 }
 
 function goRight() {
   // 날짜 범위 +1일
-  if(moveLoc > 0) {
+  if (moveLoc > 0) {
     moveLoc--;
 
-    rightDateOnChart = moment().subtract(moveLoc, 'd').format('yyyyMMDD');
-    leftDateOnChart = moment().subtract(14 + moveLoc, 'd').format('yyyyMMDD');
+    rightDateOnChart = moment().subtract(moveLoc, "d").format("yyyyMMDD");
+    leftDateOnChart = moment()
+      .subtract(14 + moveLoc, "d")
+      .format("yyyyMMDD");
     alert(rightDateOnChart + ", " + leftDateOnChart);
-    
+
     setChartData();
   }
 
-  if(moveLoc == 0) {} // 버튼 비활성화 
+  if (moveLoc == 0) {
+  } // 버튼 비활성화
 }
 
 function setChartConfig() {
-  _data= {
+  _data = {
     labels: [],
     datasets: [
       {
@@ -217,7 +254,7 @@ function setChartConfig() {
         lineTension: 0,
         backgroundColor: "#909090",
         fill: true,
-        stack: true
+        stack: true,
       },
       {
         label: "자리비움 시간",
@@ -225,7 +262,7 @@ function setChartConfig() {
         lineTension: 0,
         backgroundColor: "#F8A669",
         fill: true,
-        stack: true
+        stack: true,
       },
     ],
   };
@@ -236,35 +273,34 @@ function setChartConfig() {
     scales: {
       xAxes: {
         grid: {
-          display: false
+          display: false,
         },
         ticks: {
-          callback: (value, index, values) => { 
-            if(datesSliced[index] % 100 == moment().format('DD'))
-              return '오늘';
-            else
-              return datesSliced[index] % 100;
-          }
+          callback: (value, index, values) => {
+            if (datesSliced[index] % 100 == moment().format("DD"))
+              return "오늘";
+            else return datesSliced[index] % 100;
+          },
         },
         scaleLabels: {
-          labelString: 'q',
-          display: true
-        }
+          labelString: "q",
+          display: true,
+        },
       },
       yAxes: {
         grid: {
           drawTicks: false,
-          color: '#e0e0e0',
-          borderDash: [5, 4]
+          color: "#e0e0e0",
+          borderDash: [5, 4],
         },
         ticks: {
           min: -20,
-          padding: 10
-        }
-      }
-    }
-  }
-    /*
+          padding: 10,
+        },
+      },
+    },
+  };
+  /*
   const _options = {
     responsive: true,
     //maintainAspectRatio: false,
@@ -322,7 +358,7 @@ function setChartConfig() {
   */
   _legend = {
     display: true,
-    position: 'bottom',
+    position: "bottom",
     labels: {
       fontColor: "black",
     },
@@ -331,18 +367,19 @@ function setChartConfig() {
 }
 
 function setChartData() {
-  for(let i=0; i<15; i++) {
-    let when = moment().subtract(14+moveLoc-i, 'd').format('yyyyMMDD');
+  for (let i = 0; i < 15; i++) {
+    let when = moment()
+      .subtract(14 + moveLoc - i, "d")
+      .format("yyyyMMDD");
     datesSliced[i] = when;
     let idxOfDatesArray = dates.indexOf(when);
 
-    if(idxOfDatesArray == -1) {
+    if (idxOfDatesArray == -1) {
       studyHourSliced[i] = 0;
       pauseHourSliced[i] = 0;
       pauseCountSliced[i] = 0;
       phoneUsageCountSliced[i] = 0;
-    }
-    else {
+    } else {
       studyHourSliced[i] = studyHour[idxOfDatesArray];
       pauseHourSliced[i] = pauseHour[idxOfDatesArray];
       pauseCountSliced[i] = pauseCount[idxOfDatesArray];
