@@ -5,16 +5,6 @@ import "@tensorflow/tfjs";
 import dayjs from "dayjs";
 import { useUserStore } from "../hooks/useUserStore";
 import { Spinner, Button, Stack } from "@chakra-ui/react";
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  useDisclosure,
-} from "@chakra-ui/react";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@chakra-ui/react";
 import NavigationBar from "../components/NavigationBar";
 import { useWriteStudyLogMutation } from "../hooks/useWriteStudyLogMutation";
@@ -26,6 +16,7 @@ const Video = styled.video`
 `;
 
 function Room() {
+  const { user } = useUserStore();
   const [stream, setStream] = useState(null);
 
   const [model, setModel] = useState();
@@ -34,7 +25,7 @@ function Room() {
   const userVideo = useRef();
 
   const shouldDetectRef = useRef(false); // 버튼 클릭 시 detect 유무
-  const recordingRef = useRef(false); // 기록 flag. start, stop의 if문 실행 여부
+  const recordingRef = useRef(false); // 기록 flag. true: 기록 중, false: 기록 중지
 
   const [timeFlag, setTimeFlag] = useState(false); // 자리비움 or 자리비움 버튼 클릭 시 countDown실행
   const [pauseFlag, setPauseFlag] = useState(false);
@@ -49,8 +40,8 @@ function Room() {
   const [startButtonDisabled, setStartButtonDisabled] = useState(false);
   const [isVideoReady, setVideoState] = useState(false);
 
-  const [isExist, setExistState] = useState(false);
-
+  // const [isExist, setExistState] = useState(false);
+  const [exist, setExist] = useState(false);
   useEffect(() => {
     prepare();
   }, []);
@@ -72,27 +63,38 @@ function Room() {
     };
   }, [stream]);
 
-  let timeOut;
+  const [timeOut, setTimeOut] = useState();
   const countDown = () => {
-    timeOut = setTimeout(() => {
+    const timeOut = setTimeout(() => {
       console.log("countDown");
       pauseRecording();
     }, 5000);
+
     return timeOut;
   };
+
+  useEffect(() => {
+    console.log("exist", exist, timeOut);
+    if (exist) {
+      console.log("???");
+      clearTimeout(timeOut);
+    }
+  }, [exist, timeOut]);
+
   useEffect(() => {
     // console.log("pauseFlag", pauseFlag, "timeFlag", timeFlag);
     if (!timeFlag) return;
 
+    console.log("실행 안되나");
     if (!pauseFlag) {
       //! 사람이 카메라에 안보일때, 사람이 몇초간 감지 안될땐 countDown 후 stop
       console.log("카메라에 안보여서 자동 자리 비움");
-      recordingRef.current = false;
-      if (!isExist) countDown();
+      // setExist(false);
+      const time = countDown();
+      setTimeOut(time);
     } else {
       //! 자리비움 버튼 클릭했을 땐 바로 stop
       console.log("자리비움 버튼으로 자리 비움");
-      // puadeImage(true)
       setPauseImageFlag(true);
       pauseRecording();
     }
@@ -100,16 +102,16 @@ function Room() {
   }, [timeFlag, pauseFlag]);
 
   //! 일시 정지할 때 UI 표시하기 위한 Hook. 수정 해야함
-  let puadeImage;
-  useEffect(() => {
-    let ctx;
-    if (pauseImageFlag) {
-      ctx = canvasRef.current.getContext("2d");
-      ctx.fillStyle = "#FF0000";
-      ctx.font = "48px serif";
-      ctx.fillText("자리비움", 250, 200, 200, 100);
-    }
-  }, [pauseImageFlag]);
+  // let puadeImage;
+  // useEffect(() => {
+  //   let ctx;
+  //   if (pauseImageFlag) {
+  //     ctx = canvasRef.current.getContext("2d");
+  //     ctx.fillStyle = "#FF0000";
+  //     ctx.font = "48px serif";
+  //     ctx.fillText("자리비움", 250, 200, 200, 100);
+  //   }
+  // }, [pauseImageFlag]);
 
   //! page 로딩 시 첫 실행될 부분
   const prepare = async () => {
@@ -153,7 +155,7 @@ function Room() {
     const predictions = await model.detect(userVideo.current);
 
     //! detect box UI
-    renderPredictions(predictions);
+    // renderPredictions(predictions);
 
     //! detect는 coco의 80개의 class가 다 detect.
     //! if로 사람과 핸드폰만 필터
@@ -168,17 +170,21 @@ function Room() {
     // detect되지 않으면 else if문으로 인해 lastDetectionsRef.length 감소
     // else if문에서 lastDetectionsRef.current가 0이 되면 stopRecroding 호출
     // if (foundPerson || foundCellPhone) {
-    console.log(foundPerson);
+    // console.log(foundPerson);
     if (foundPerson) {
       // console.log("if : ", lastDetectionsRef.current.length);
-      exist.current = true;
-      resumeRecoding();
+      setExist(true);
+
+      if (!recordingRef.current) {
+        resumeRecoding();
+      }
     } else {
       // 사람 검출이 안되면 실행.
+      console.log("검출 안됨.");
       foundPerson = false;
       setTimeFlag(true);
       setPauseFlag(false);
-      exist.current = false;
+      setExist(false);
     }
 
     requestAnimationFrame(() => {
@@ -198,14 +204,10 @@ function Room() {
     console.log("start recording");
   };
 
-  const exist = useRef(false);
   const resumeRecoding = () => {
     // console.log("ㄹㅇㄴㅁㄹㄴ recording");
     // clearTimeout(countDown());
-    if (exist.current) {
-      // console.log("???");
-      clearTimeout(timeOut);
-    }
+
     if (recordingRef.current) {
       return;
     }
@@ -236,9 +238,6 @@ function Room() {
   };
 
   const pauseRecording = () => {
-    // if (!recordingRef.current) {
-    //   return;
-    // }
     // writeStudyMutaion({
     //   variables: { action: "pause", roomId: "7", userName: user.name },
     // });
@@ -342,8 +341,8 @@ function Room() {
           <div className="row">
             <div className="col">
               {/* <video autoPlay playsInline muted ref={userVideo} /> */}
-              <Video playsInline muted ref={userVideo} autoPlay />;
-              <canvas
+              <Video playsInline muted ref={userVideo} autoPlay />
+              {/* <canvas
                 className="size"
                 ref={canvasRef}
                 width="500"
@@ -353,8 +352,8 @@ function Room() {
                   top: 120,
                   left: 0,
                 }}
-              />
-              {pauseImageFlag ? (
+              /> */}
+              {/* {pauseImageFlag ? (
                 <canvas
                   width="600"
                   height="500"
@@ -365,7 +364,7 @@ function Room() {
                     left: 0,
                   }}
                 />
-              ) : null}
+              ) : null} */}
             </div>
             <div className="col">
               <div>
@@ -374,6 +373,7 @@ function Room() {
                   direction="row"
                   align="center"
                   marginBottom="10px"
+                  marginTop="10px"
                 >
                   {startToRestartButton ? (
                     <Button
@@ -390,7 +390,6 @@ function Room() {
                         startRecording();
                         detectFrame();
                         setStartToRestartButton(false);
-                        // puadeImage(false)
                         setPauseImageFlag(false);
                       }}
                     >
@@ -408,11 +407,9 @@ function Room() {
 
                         setLeftButtonDisabled(false);
 
-                        // resumeRecoding();
                         detectFrame();
                         setTimeFlag(false);
                         setPauseFlag(false);
-                        // puadeImage(false)
                         setPauseImageFlag(false);
                       }}
                     >
@@ -434,7 +431,6 @@ function Room() {
                       stopRecording();
                       setPauseFlag(false);
                       setTimeFlag(false);
-                      // puadeImage(false)
                       setPauseImageFlag(false);
                     }}
                   >
