@@ -31,6 +31,11 @@ export default function NavigationBar() {
             </a>
           </li>
           <li>
+            <a className="nav-link scrollto" href="/room">
+              Study
+            </a>
+          </li>
+          <li>
             <a className="nav-link scrollto" href="/studyStatistics">
               Statistics
             </a>
@@ -48,6 +53,16 @@ export default function NavigationBar() {
             </a>
           </li>
           <li>
+            <a
+              className="nav-link scrollto"
+              onClick={() => {
+                history.replace("/room");
+              }}
+            >
+              Study
+            </a>
+          </li>
+          <li>
             <a className="nav-link scrollto active" href="/studyStatistics">
               Statistics
             </a>
@@ -59,6 +74,16 @@ export default function NavigationBar() {
     if (path === "/room") {
       return (
         <>
+          <li>
+            <a className="nav-link scrollto" onClick={history.goBack}>
+              Home
+            </a>
+          </li>
+          <li>
+            <a className="nav-link scrollto active" href="/room">
+              Study
+            </a>
+          </li>
           <li>
             <a
               className="nav-link scrollto"
