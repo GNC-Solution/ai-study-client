@@ -99,11 +99,11 @@ export default function NavigationBar() {
         <nav id="navbar" className="navbar">
           <ul>
             {renderContent()}
-            <li>
+            {/* <li>
               <Link to="/test" className="nav-link scrollto">
                 Test
               </Link>
-            </li>
+            </li> */}
             <li>
               {!user ? (
                 <Link to="/login" className="nav-link scrollto">

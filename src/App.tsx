@@ -1,15 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Test from "./pages/Test";
 import Room from "./pages/Room";
-import Test1 from "./pages/Test1"
+import Test1 from "./pages/Test1";
 import StudyStatistics from "./pages/StudyStatistics";
-
 
 // TODO: test route should be removed
 function App() {
+  // useEffect(() => {
+  //   loadEventListener();
+  // }, []);
+
   return (
     <BrowserRouter>
       <Switch>
@@ -27,12 +30,11 @@ function App() {
           <Test roomNumber={"2"} />
         </Route>
         <Route path="/studyStatistics">
-          <StudyStatistics/>
+          <StudyStatistics />
         </Route>
-        <Route path="/test1">
-          <Test1/>
-        </Route>
-
+        {/* <Route path="/test1">
+          <Test1 />
+        </Route> */}
       </Switch>
     </BrowserRouter>
   );
