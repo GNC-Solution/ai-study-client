@@ -11,8 +11,6 @@ export default function NavigationBar() {
   const history = useHistory();
   const [, , removeCookie] = useCookies([USER_KEY]);
 
-  // console.log("NavigationBar history", history);
-
   const path = history.location.pathname;
   // console.log("경로?", path);
 
