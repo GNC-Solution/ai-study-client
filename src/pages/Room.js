@@ -4,7 +4,7 @@ import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import "@tensorflow/tfjs";
 import dayjs from "dayjs";
 import { useUserStore } from "../hooks/useUserStore";
-import { Spinner, Button, Stack, Box, background } from "@chakra-ui/react";
+import { Spinner, Button, Stack, Box } from "@chakra-ui/react";
 import { Table, Thead, Tbody, Tr, Th, Td } from "@chakra-ui/react";
 import NavigationBar from "../components/NavigationBar";
 import { useWriteStudyLogMutation } from "../hooks/useWriteStudyLogMutation";
@@ -17,40 +17,54 @@ const Video = styled.video`
 `;
 
 function Room() {
-  const { user } = useUserStore();
-  const [stream, setStream] = useState(null);
+  const { user } = useUserStore(); //* mutation에 필요한 user.name
+  const [stream, setStream] = useState(null); //* vedio stream
 
   const [model, setModel] = useState();
 
   const canvasRef = useRef();
   const userVideo = useRef();
 
-  const shouldDetectRef = useRef(false); // 버튼 클릭 시 detect 유무
-  const recordingRef = useRef(false); // 기록 flag. true: 기록 중, false: 기록 중지
+  const shouldDetectRef = useRef(false); //* 버튼 클릭 시 detect 유무
+  const recordingRef = useRef(false); //* 기록 flag. true: 기록 중, false: 기록 중지
 
-  const [timeFlag, setTimeFlag] = useState(false); // 자리비움 or 자리비움 버튼 클릭 시 countDown실행
+  const [timeFlag, setTimeFlag] = useState(false); //* 자리비움 or 자리비움 버튼 클릭 시 countDown실행
   const [pauseFlag, setPauseFlag] = useState(false);
-  const [pauseImageFlag, setPauseImageFlag] = useState(false);
 
-  const [startToRestartButton, setStartToRestartButton] = useState(true);
+  const [startToRestartButtonFlag, setStartToRestartButtonFlag] =
+    useState(true); //* 학습 시작 -> 학습 재시작 버튼으로 만드는 flag
 
-  const [writeStudyMutaion, { data }] = useWriteStudyLogMutation();
-  const [countPhoneUsage, { datas }] = usePhoneLogMutation();
+  const isPhoneMutation = useRef(false);
+  const [writeStudyMutation] = useWriteStudyLogMutation();
+  const [countPhoneUseMutation] = usePhoneLogMutation();
 
+  //* 버튼 활성, 비활성 유무
   const [stopButtonDisabled, setStopButtonDisabled] = useState(true);
   const [leftButtonDisabled, setLeftButtonDisabled] = useState(true);
   const [startButtonDisabled, setStartButtonDisabled] = useState(false);
+
+  //* video 준비 되기 전까지 spinner 동작을 하기위한 flag
   const [isVideoReady, setVideoState] = useState(false);
 
+  //* 학습 Box UI flag
   const [isPauseImageFlag, setIsPauseImageFlag] = useState(false);
   const [isStartImageFlag, setIsStartImageFlag] = useState(false);
 
+  //* 자동 자리 비움 시 사람이 있냐 없냐에 따른 timer start, stop을 위한 flag....Y / N
+  const [isPerson, setIsPerson] = useState();
+
+  //* 자동 자리 비움 시 timer id를 통한 start, stop
+  const [timerId, setTimerId] = useState();
+
+  //!============================================================================================================================================
+  //* Room page 첫 로딩 시
   useEffect(() => {
     prepare();
   }, []);
 
-  //! page Destroy 되면 실행될 부분
-  //! 기록 중일 때 detect Stop, 카메라 Stop
+  //!============================================================================================================================================
+  //* page Destroy 되면 실행될 부분
+  //* 기록 중일 때 detect Stop, 카메라 Stop
   useEffect(() => {
     return () => {
       if (stream !== null) {
@@ -59,61 +73,56 @@ function Room() {
             track.stop();
           }
         });
-        // window.stream = null
-        console.log(recordingRef.current);
+
+        //* 기록 중일 시 stop
         if (recordingRef.current) stopRecording();
       }
     };
   }, [stream]);
 
-  const [isPerson, setIsPerson] = useState();
-  const [timerId, setTimerId] = useState();
-
+  //!============================================================================================================================================
+  //* 자리 비움 시 Timer를 통한 Pause 실행
   const startTimer = () => {
     const countId = setTimeout(() => {
       console.log("카메라에 안보여서 자동 자리 비움");
-      console.log("일시 중지");
+      // console.log("일시 중지");
       pauseRecording();
     }, 5000);
     setTimerId(countId);
-    console.log("start ID : ", timerId);
+    // console.log("start ID : ", timerId);
   };
 
   const stopTimer = () => {
     clearTimeout(timerId);
-    console.log("stop ID : ", timerId);
+    // console.log("stop ID : ", timerId);
   };
 
+  //* 카메라에 사람이 안보이면 "N", 보이면  "Y"
   useEffect(() => {
-    console.log("사람인가?", isPerson, timerId);
+    // console.log("사람인가?", isPerson, timerId);
     if (isPerson === "N") {
       startTimer();
     } else if (isPerson === "Y") {
       stopTimer();
     }
   }, [isPerson]);
-
+  //!============================================================================================================================================
   useEffect(() => {
-    console.log("pauseFlag", pauseFlag, "timeFlag", timeFlag);
+    // console.log("pauseFlag", pauseFlag, "timeFlag", timeFlag);
     if (!timeFlag) return;
 
-    if (!pauseFlag) {
-      //! 사람이 카메라에 안보일때, 사람이 몇초간 감지 안될땐 countDown 후 stop
-      console.log("카메라에 안보여서 자동 자리 비움");
-    } else {
-      //! 자리비움 버튼 클릭했을 땐 바로 stop
+    if (pauseFlag) {
+      //* 자리비움 버튼 클릭했을 땐 바로 stop
       console.log("자리비움 버튼으로 자리 비움");
-      setPauseImageFlag(true);
       pauseRecording();
     }
   }, [timeFlag, pauseFlag]);
 
-  //! 일시 정지할 때 UI 표시하기 위한 Hook. 수정 해야함
-
-  //! page 로딩 시 첫 실행될 부분
+  //!============================================================================================================================================
+  //* page 로딩 시 첫 실행될 부분
   const prepare = async () => {
     try {
-      //! cam load
+      //* cam load
       const getWebCam = async () => {
         const devices = navigator.mediaDevices;
         const videoStream = await devices.getUserMedia({ video: true });
@@ -126,7 +135,7 @@ function Room() {
         }
       };
 
-      //! model load
+      //* model load
       const setModelFromCocoSsd = async () => {
         const model = await cocoSsd.load();
         setModel(model);
@@ -138,44 +147,29 @@ function Room() {
     }
   };
 
-  const [isMutationCalled, setIsMutationCalled] = useState(false);
-  const isMutation = useRef(false);
-
-  // useEffect(() => {
-  //   // if (isMutationCalled) {
-  //   console.log("핸드폰 뮤데이션");
-  //   phoneMutation();
-  //   // }
-  // }, [isMutationCalled]);
-  // requestAnimationFrame으로 지속적으로 detectFrame을 반복함.
-  // shouldDetectRef로 detect 제어
-  const test = () => {
-    // if (isMutationCalled) {
-    countPhoneUsage({
-      variables: { userName: user.name },
-    });
-    // }
-  };
-
+  //!============================================================================================================================================
+  //* requestAnimationFrame으로 지속적으로 detectFrame을 반복함.
+  //* shouldDetectRef로 detect 제어
   const detectFrame = async () => {
-    // "shouldRecrodRef = true" : start 버튼 클릭 시
-    // "shouldRecrodRef = false" : stop 버튼 클릭 시
+    //* "shouldRecrodRef = true" : start 버튼 클릭 시
+    //* "shouldRecrodRef = false" : stop 버튼 클릭 시
     if (!shouldDetectRef.current) {
-      // pauseRecording();
       return;
     }
 
     if (!userVideo.current) return;
     const predictions = await model.detect(userVideo.current);
 
-    //! detect box UI
-    // renderPredictions(predictions);
+    //* detect box UI
+    renderPredictions(predictions);
 
-    //! detect는 coco의 80개의 class가 다 detect.
-    //! if로 사람과 핸드폰만 필터
+    //* detect는 coco의 80개의 class가 다 detect.
+    //* if로 사람과 핸드폰만 필터
     let foundPerson = false;
     let foundCellPhone = false;
     let isCalled = false;
+
+    //* 사람일 때
     for (let i = 0; i < predictions.length; i++) {
       if (predictions[i].class === "person") {
         foundPerson = true;
@@ -183,54 +177,36 @@ function Room() {
       }
     }
 
+    //* 핸드폰일 때
     for (let i = 0; i < predictions.length; i++) {
       if (predictions[i].class === "cell phone") {
         foundCellPhone = true;
-        // console.log(`is mutation called: ${isMutation.current}`);
 
-        if (isMutation.current || isCalled) break;
+        if (isPhoneMutation.current || isCalled) break;
 
         console.log("mutation call");
-        countPhoneUsage({
-          variables: { userName: user.name },
-        });
+        // countPhoneUseMutation({
+        //   variables: { userName: user.name },
+        // });
         isCalled = true;
-        isMutation.current = true;
-        setIsMutationCalled(true);
+        isPhoneMutation.current = true;
       }
     }
 
     if (!foundCellPhone) {
-      isMutation.current = false;
-      setIsMutationCalled(false);
-    } else {
-      console.log("mutation call!!!!!!!!!!!!!");
+      isPhoneMutation.current = false;
     }
-    // 첫 if문에서 detect 되면 lastDetectionsRef.length가 증가
-    // detect되지 않으면 else if문으로 인해 lastDetectionsRef.length 감소
-    // else if문에서 lastDetectionsRef.current가 0이 되면 stopRecroding 호출
 
     if (foundPerson) {
-      // console.log("if : ", lastDetectionsRef.current.length);
-      // setExist(true);
-
       if (!recordingRef.current) {
-        // console.log("timeOutNum", timeOutNum);
-
         resumeRecoding();
       }
     } else {
       // 사람 검출이 안되면 실행.
-      foundPerson = false;
       setIsPerson("N");
       setTimeFlag(true);
       setPauseFlag(false);
-      // setExist(false);
     }
-
-    //! 핸드폰 검출 - 핸드폰이 검출 되고 기록 중일 때
-
-    // console.log("폰 유무", foundCellPhone);
 
     requestAnimationFrame(() => {
       // 대강 애니메이션 반복에 최적화된 함수? => 동영상 detect를 하기 때문에 반복이 필요해서 사용됨
@@ -238,13 +214,14 @@ function Room() {
     });
   };
 
+  //!============================================================================================================================================
   // 사람 detect 하면 startRecoding 계속 실행. 하지만 if문으로 인해 return됨.
   // 즉, 첫 실행일 때만 if문 아래 코드 실행됨.
   const startRecording = () => {
     recordingRef.current = true;
-    writeStudyMutaion({
-      variables: { action: "start", roomId: "7", userName: user.name },
-    });
+    // writeStudyMutation({
+    //   variables: { action: "start", roomId: "7", userName: user.name },
+    // });
     setIsStartImageFlag(true);
     console.log("start recording");
   };
@@ -254,9 +231,9 @@ function Room() {
       return;
     }
 
-    writeStudyMutaion({
-      variables: { action: "resume", roomId: "7", userName: user.name },
-    });
+    // writeStudyMutation({
+    //   variables: { action: "resume", roomId: "7", userName: user.name },
+    // });
     setIsStartImageFlag(true);
     setIsPauseImageFlag(false);
     setTimeFlag(false);
@@ -264,14 +241,14 @@ function Room() {
     recordingRef.current = true;
     console.log("resume recording");
   };
-  //! StopRecoding
+  //* StopRecoding
   const [nowArray, setNowArray] = useState([]);
   const copiedNowArray = [...nowArray];
 
   const stopRecording = () => {
-    writeStudyMutaion({
-      variables: { action: "stop", roomId: "7", userName: user.name },
-    });
+    // writeStudyMutation({
+    //   variables: { action: "stop", roomId: "7", userName: user.name },
+    // });
     recordingRef.current = false;
     setIsStartImageFlag(false);
     setIsPauseImageFlag(false);
@@ -282,9 +259,9 @@ function Room() {
   };
 
   const pauseRecording = () => {
-    writeStudyMutaion({
-      variables: { action: "pause", roomId: "7", userName: user.name },
-    });
+    // writeStudyMutation({
+    //   variables: { action: "pause", roomId: "7", userName: user.name },
+    // });
     setIsStartImageFlag(false);
     setIsPauseImageFlag(true);
     recordingRef.current = false;
@@ -294,11 +271,8 @@ function Room() {
     setNowArray(copiedNowArray);
   };
 
-  // if (window.innerWidth > 700)
-  //   //
-  // else
-
-  //! detect box UI function
+  //!============================================================================================================================================
+  //* detect box UI function
   const renderPredictions = (predictions) => {
     const ctx = canvasRef.current.getContext("2d");
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -336,13 +310,13 @@ function Room() {
     });
   };
 
+  //! 공부중, 자리비움 BOX UI
   const actionImage = () => {
-    console.log(window.size);
     // if (window.location.width > 700) {
     if (isStartImageFlag) {
       return (
         <>
-          <Box bg="green" w="100%" h="11%" p={4} color="white">
+          <Box bg="green" w="100%" h="7.5vh" p={4} color="white">
             공부 중
           </Box>
         </>
@@ -350,7 +324,7 @@ function Room() {
     } else if (isPauseImageFlag) {
       return (
         <>
-          <Box bg="tomato" w="100%" h="11%" p={4} color="white">
+          <Box bg="tomato" w="100%" h="7.5vh" p={4} color="white">
             자리 비움
           </Box>
         </>
@@ -358,13 +332,12 @@ function Room() {
     } else if (!isPauseImageFlag) {
       return (
         <>
-          <Box bg="white" w="100%" h="11%" p={4} color="white">
+          <Box bg="white" w="100%" h="7.5vh" p={4} color="white">
             ----------
           </Box>
         </>
       );
     }
-    // }
   };
 
   return (
@@ -422,20 +395,10 @@ function Room() {
         >
           <div className="row">
             <div className="col">
-              {/* <video autoPlay playsInline muted ref={userVideo} /> */}
               <Video playsInline muted ref={userVideo} autoPlay />
               {actionImage()}
-              {/* {isPauseImageFlag ? (
-                <Box bg="tomato" w="100%" h="15%" p={4} color="white">
-                  자리 비움
-                </Box>
-              ) : (
-                <Box bg="white" w="100%" h="15%" p={4} color="black">
-                  ----------
-                </Box>
-              )} */}
 
-              {/* <canvas
+              <canvas
                 className="size"
                 ref={canvasRef}
                 width="500"
@@ -445,7 +408,7 @@ function Room() {
                   top: 120,
                   left: 0,
                 }}
-              /> */}
+              />
             </div>
             <div className="col">
               <div>
@@ -456,7 +419,7 @@ function Room() {
                   marginBottom="10px"
                   marginTop="10px"
                 >
-                  {startToRestartButton ? (
+                  {startToRestartButtonFlag ? (
                     <Button
                       colorScheme="green"
                       size="md"
@@ -470,8 +433,7 @@ function Room() {
 
                         startRecording();
                         detectFrame();
-                        setStartToRestartButton(false);
-                        setPauseImageFlag(false);
+                        setStartToRestartButtonFlag(false);
                       }}
                     >
                       학습 시작
@@ -491,7 +453,6 @@ function Room() {
                         detectFrame();
                         setTimeFlag(false);
                         setPauseFlag(false);
-                        setPauseImageFlag(false);
                       }}
                     >
                       학습 재시작
@@ -507,12 +468,11 @@ function Room() {
                       setStopButtonDisabled(true);
 
                       setLeftButtonDisabled(true);
-                      setStartToRestartButton(true);
+                      setStartToRestartButtonFlag(true);
 
                       stopRecording();
                       setPauseFlag(false);
                       setTimeFlag(false);
-                      setPauseImageFlag(false);
                     }}
                   >
                     학습 종료
@@ -528,7 +488,6 @@ function Room() {
 
                       setTimeFlag(true); // true : 일시 정지 버튼 클릭 시 countDown하고 stopRecoding
                       setPauseFlag(true);
-                      setPauseImageFlag(true);
                     }}
                   >
                     자리비움
