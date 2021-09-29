@@ -8,8 +8,11 @@ tensorflow.js를 활용해 사용자를 추적해서 학습도를 측정할 수 
 2. yarn 설치
    - npm install --global yarn
 
-3. react 패키지 설치
+3. git clone
+    - git clone [git repo 주소]
+
+4. react 패키지 설치
     - yarn
 
-4. 실행
+5. 실행
     - yarn start
