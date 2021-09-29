@@ -140,9 +140,11 @@ function Room() {
         const model = await cocoSsd.load();
         setModel(model);
       };
+      
       await Promise.all([getWebCam(), setModelFromCocoSsd()]);
       setVideoState(true);
     } catch (error) {
+      console.log("왜 안돼~")
       console.error(error);
     }
   };
@@ -219,9 +221,9 @@ function Room() {
   // 즉, 첫 실행일 때만 if문 아래 코드 실행됨.
   const startRecording = () => {
     recordingRef.current = true;
-    // writeStudyMutation({
-    //   variables: { action: "start", roomId: "7", userName: user.name },
-    // });
+    writeStudyMutation({
+      variables: { action: "start", roomId: "7", userName: user.name },
+    });
     setIsStartImageFlag(true);
     console.log("start recording");
   };
@@ -231,9 +233,9 @@ function Room() {
       return;
     }
 
-    // writeStudyMutation({
-    //   variables: { action: "resume", roomId: "7", userName: user.name },
-    // });
+    writeStudyMutation({
+      variables: { action: "resume", roomId: "7", userName: user.name },
+    });
     setIsStartImageFlag(true);
     setIsPauseImageFlag(false);
     setTimeFlag(false);
@@ -246,9 +248,9 @@ function Room() {
   const copiedNowArray = [...nowArray];
 
   const stopRecording = () => {
-    // writeStudyMutation({
-    //   variables: { action: "stop", roomId: "7", userName: user.name },
-    // });
+    writeStudyMutation({
+      variables: { action: "stop", roomId: "7", userName: user.name },
+    });
     recordingRef.current = false;
     setIsStartImageFlag(false);
     setIsPauseImageFlag(false);
@@ -259,9 +261,9 @@ function Room() {
   };
 
   const pauseRecording = () => {
-    // writeStudyMutation({
-    //   variables: { action: "pause", roomId: "7", userName: user.name },
-    // });
+    writeStudyMutation({
+      variables: { action: "pause", roomId: "7", userName: user.name },
+    });
     setIsStartImageFlag(false);
     setIsPauseImageFlag(true);
     recordingRef.current = false;
